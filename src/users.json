@@ -1,6 +1,11 @@
-{
-    "name": [
-        "dishgun1",
-        "scrubdish"
-    ]
-}
+[
+    {
+        "name": "dishgun1"
+    },
+    {
+        "name": "scrubdish"
+    },
+    {
+        "name": "sonicscruba"
+    }
+]

@@ -62,24 +62,58 @@ def terminal():
     else:
         print(f"Request failed: {resp['response'].status_code}")
 
-# Todo : corriger les erreurs de variable
+
 def process():
     users = openConfig()
 
-    usersInfos = []
-    for user in users:
-        usersInfos.append(getUserInfos(user['name']))
+    data = []
+    dataUserInfo = openJson("usersInfos.json")
+    dataVideos = openJson("videos.json")
+    for index, user in users:
+        #userInfo = getUserInfos(user['name'])['user_list'][0]['user']
+        #videos = getUserVideos(userInfo)['videos']
 
+        userInfo = dataUserInfo[index]
+        videos = dataVideos[index]
 
-    videos = []
-    for userInfo in userInfo:
-        videos.append(getUserVideos(userInfo['user']['id'], userInfo['user']['secUid']))
+        for video in videos:
+            data.append({
+                'user': {
+                    'id': userInfo['id'],
+                    'uniqueId': userInfo['uniqueId'],
+                    'secUid': userInfo['secUid']
+                },
+                'videos': video,
+            })
 
     urlList = []
-    for video in videos:
-        urlList.append(f"https://www.tiktok.com/@{video['author']['uniqueId']}/video/{video['id']}")
+    for info in data:
+        print(info['videos'])
+        urlList.append(f"https://www.tiktok.com/@{info['user']['uniqueId']}/video/{info['videos']['video_id']}")
+
+    #for url in urlList:
+    #    getVideoByUrl(url)
 
     downloadUrl(urlList)
+
+
+def saveData(file_path, data):
+        try:
+            with open(file_path, "+w") as f:
+                json.dump(data, f, sort_keys=True, indent=4, ensure_ascii=False)
+        except Exception as error:
+            print(f"An error has been encountered while trying to save in json file. This is the error: {error.args[1]}")
+
+
+def openJson(file_path) -> []:
+        try:
+            with open(file_path, '+r') as f:
+                existing_data = json.load(f)
+        except Exception as error:
+            print(f"An error has been encountered while trying to open json file. This is the error: {error.args[1]}")
+            existing_data = []
+            
+        return existing_data
 
 
 def openConfig() -> []:
@@ -93,33 +127,33 @@ def openConfig() -> []:
 
 
 def getUserInfos(username):
-    url = "https://tiktok82.p.rapidapi.com/getProfile"
+    url = "https://tiktok-download-video1.p.rapidapi.com/searchUser"
 
-    querystring = {"username": username}
+    querystring = {"keywords": username, "count": "1", "cursor": "0"}
 
     headers = {
     	"X-RapidAPI-Key": apiKey,
-    	"X-RapidAPI-Host": "tiktok82.p.rapidapi.com"
+    	"X-RapidAPI-Host": "tiktok-download-video1.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
 
-    return response.json()
+    return response.json()['data']
 
 
-def getUserVideos(userId, userSecUid):
-    url = "https://tiktok82.p.rapidapi.com/getUserVideos"
+def getUserVideos(user):
+    url = "https://tiktok-download-video1.p.rapidapi.com/userPublishVideo"
 
-    querystring = {"user_id": userId,"secUid": userSecUid}
+    querystring = {"unique_id": user['uniqueId'], "user_id": user['id'], "count": "1", "cursor": "0"}
 
     headers = {
     	"X-RapidAPI-Key": apiKey,
-    	"X-RapidAPI-Host": "tiktok82.p.rapidapi.com"
+    	"X-RapidAPI-Host": "tiktok-download-video1.p.rapidapi.com"
     }
 
     response = requests.get(url, headers=headers, params=querystring)
 
-    return response.json()['items']
+    return response.json()['data']
 
 
 def getVideoByUrl(link):
