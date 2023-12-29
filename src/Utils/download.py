@@ -2,17 +2,22 @@ import requests
 import os
 
 class Download:
-    def downloadUrl(urlList):
+    def __init__(self, urlList):
+        """Init a download instance."""
+
+        self.urls = urlList
+        self.downloadUrl()
+        
+    def downloadUrl(self):
         noOne = False
-        for url in urlList:
+        for url in self.urls:
             data = requests.get(url)
             if data.status_code == 200:
                 noOne = True
                 break
             
         if not noOne:
-            print("Links to download aren't working")
-            exit(1)
+            raise Exception("Links to download aren't working")
     
         file = "video"
         i = 0

@@ -1,18 +1,20 @@
 import tkinter as tk
-from tkinter import messagebox
 import re
-import uuid
 from Utils.file import File
 from Utils.download import Download
-from Api.tiktokdownload import Api
+from Api.tiktokdownload import TiktokDownload
+from Api.tiktok import Tiktok
+
+global userFile
+userFile = File("users.json")
 
 def downloadVideos(count):
-    users = File.openJson("users.json")
+    users = userFile.open()
 
     data = []
     for user in users:
-        userInfo = Api.getUserInfos(user['name'])['user_list'][0]['user']
-        videos = Api.getUserVideos(userInfo, count)['videos']
+        userInfo = TiktokDownload().getUserInfos(user['name'])['user_list'][0]['user']
+        videos = TiktokDownload().getUserVideos(userInfo, count)['videos']
 
         for video in videos:
             if video['is_top'] == 0:
@@ -30,18 +32,32 @@ def downloadVideos(count):
         urlList.append(f"https://www.tiktok.com/@{info['user']['uniqueId']}/video/{info['videos']['video_id']}")
 
     for url in urlList:
-        list = Api.getVideoByUrl(url)
-        Download.downloadUrl(list)
+        list = TiktokDownload().getVideoByUrl(url)
+        Download(list)
+
+
+def removeUser(id):
+    print(id)
 
 
 def usersSettings():
     window = tk.Tk()
     window.title("Users settings")
 
-    users = File.openJson("users.json")
+    users = userFile.open()
 
-    for user in users:
-        tk.Grid()
+    title = tk.Label(master=window, text="Users: ")
+    title.grid(column=0, row=0)
+
+    frame = tk.Frame(master=window)
+    frame.grid(column=0, row=1)
+
+    for i, user in enumerate(users):
+        userName = tk.Label(master=frame, text=user['name'])
+        userName.grid(column=0, row=i)
+
+        cross = tk.Button(master=frame, text="x")
+        cross.grid(column=1, row=i)
 
 
 if __name__ == "__main__":
@@ -69,7 +85,7 @@ if __name__ == "__main__":
             if not nbr.isdigit():
                 raise Exception()
         except:
-            nbrErrorLabel = tk.Label(text="Il faut entre un nombre.", master=frame)
+            nbrErrorLabel = tk.Label(text="Il faut entre un nombre.", master=frame, fg="red")
             nbrErrorLabel.grid(column=0, row=3)
 
             frame.pack()
@@ -79,8 +95,6 @@ if __name__ == "__main__":
 
     button = tk.Button(master=frame,
                        text="Download",
-                       bg="gray",
-                       fg="white",
                        command=buttonNbrPressed
                        )
     button.grid(column=0, row=2)
@@ -98,19 +112,17 @@ if __name__ == "__main__":
             if not regex.match(link):
                 raise Exception()
         except:
-            linkErrorLabel = tk.Label(text="Il faut un lien valide.", master=frame)
+            linkErrorLabel = tk.Label(text="Il faut un lien valide.", master=frame, fg="red")
             linkErrorLabel.grid(column=0, row=7)
 
             frame.pack()
             return
         
-        list = Api.getVideoByUrl(link)
-        Download.downloadUrl(list)
+        list = TiktokDownload().getVideoByUrl(link)
+        Download(list)
 
     button = tk.Button(master=frame,
                        text="Download from link",
-                       bg="gray",
-                       fg="white",
                        command=buttonLinkPressed
                        )
     button.grid(column=0, row=6)

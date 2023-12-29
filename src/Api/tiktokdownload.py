@@ -1,40 +1,42 @@
 import requests
 
-global apiKey
-with open(".token", "+r") as f:
-    apiKey = f.readline()
+class TiktokDownload:
+    def __init__(self) -> None:
+        """Init a tiktokdownload instance."""
 
-class Api:
-    headers = {
-        "X-RapidAPI-Key": apiKey,
-    	"X-RapidAPI-Host": "tiktok-download-video1.p.rapidapi.com"
-    }
+        with open(".token", "+r") as f:
+            key = f.readline()
 
-    def getUserInfos(username):
+        self.headers = {
+            "X-RapidAPI-Key": key,
+    	    "X-RapidAPI-Host": "tiktok-download-video1.p.rapidapi.com"
+        }
+
+    def getUserInfos(self, username):
         url = "https://tiktok-download-video1.p.rapidapi.com/searchUser"
 
         querystring = {"keywords": username, "count": "1", "cursor": "0"}
 
-        response = requests.get(url, headers=Api.headers, params=querystring)
+        response = requests.get(url, headers=self.headers, params=querystring)
 
         return response.json()['data']
 
 
-    def getUserVideos(user, count):
+    def getUserVideos(self, user, count):
         url = "https://tiktok-download-video1.p.rapidapi.com/userPublishVideo"
 
         querystring = {"unique_id": f"@${user['uniqueId']}", "user_id": user['id'], "count": count, "cursor": "0"}
 
-        response = requests.get(url, headers=Api.headers, params=querystring)
+        response = requests.get(url, headers=self.headers, params=querystring)
 
         return response.json()['data']
 
 
-    def getVideoByUrl(link):
+    def getVideoByUrl(self, link):
         apiUrl = "https://tiktok-download-video1.p.rapidapi.com/getVideo"
         params = {"url": link, "hd": "1"}
 
-        response = requests.get(apiUrl, headers=Api.headers, params=params)
+        response = requests.get(apiUrl, headers=self.headers, params=params)
         responseJson = response.json()
 
         if responseJson['code'] == 0:
