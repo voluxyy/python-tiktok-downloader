@@ -1,9 +1,9 @@
 import tkinter as tk
 import re
-from Utils.file import File
-from Utils.download import Download
-from Api.tiktokdownload import TiktokDownload
-from Api.tiktok import Tiktok
+from utils.file import File
+from utils.download import Download
+from api.tiktokdownload import TiktokDownload
+from api.tiktok import Tiktok
 
 global userFile
 userFile = File("users.json")
