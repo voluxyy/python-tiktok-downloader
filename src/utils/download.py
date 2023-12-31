@@ -4,10 +4,10 @@ import os
 class Download:
     def __init__(self, urlList):
         """Init a download instance."""
-
         self.urls = urlList
         self.downloadUrl()
         
+
     def downloadUrl(self):
         noOne = False
         for url in self.urls:

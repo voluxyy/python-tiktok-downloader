@@ -1,5 +1,5 @@
-import tkinter as tk
 import re
+from utils.gui import Gui
 from utils.file import File
 from utils.download import Download
 from api.tiktokdownload import TiktokDownload
@@ -41,79 +41,67 @@ def removeUser(id):
 
 
 def usersSettings():
-    window = tk.Tk()
+    window = gui.Window()
     window.title("Users settings")
 
     users = userFile.open()
 
-    title = tk.Label(master=window, text="Users: ")
-    title.grid(column=0, row=0)
+    gui.Label(master=window, text="Users: ", column=0, row=0)
 
-    frame = tk.Frame(master=window)
-    frame.grid(column=0, row=1)
+    frame = gui.Frame(master=window, column=0, row=1)
 
     for i, user in enumerate(users):
-        userName = tk.Label(master=frame, text=user['name'])
-        userName.grid(column=0, row=i)
+        gui.Label(master=frame, text=user['name'], column=0, row=i)
 
-        cross = tk.Button(master=frame, text="x")
-        cross.grid(column=1, row=i)
+        gui.Button(master=frame, text="x", command=lambda: removeUser(user['id']), column=1, row=i)
 
 
-if __name__ == "__main__":
-    window = tk.Tk()
+if __name__ =="__main__":
+    gui = Gui()
+
+    window = gui.Window()
     window.title("Tiktok downloader")
 
-    menu = tk.Menu(master=window)
-    window.config(menu=menu)   
+    menu = gui.Menu(master=window)
+    window.config(menu=menu)
 
-    optionsMenu = tk.Menu(master=menu)
+    optionsMenu = gui.Menu(master=menu)
     optionsMenu.add_command(label="Users", command=usersSettings)
-    menu.add_cascade(label="options", menu=optionsMenu)     
+    menu.add_cascade(label="Options", menu=optionsMenu)
 
-    frame = tk.Frame(master=window, width=300, height=200)
+    frame = gui.Frame(master=window, column=0, row=0)
 
-    label = tk.Label(text="Nombre de vidéo à télécharger: ", master=frame)
-    label.grid(column=0, row=0)
+    label = gui.Label(master=frame, text="Nombre de vidéo à télécharger: ", column=0, row=0)
 
-    nbrInput = tk.Entry(master=frame)
-    nbrInput.grid(column=0, row=1)
+    nbrEntry = gui.Entry(master=frame, column=0, row=1)
 
     def buttonNbrPressed():
         try:
-            nbr = nbrInput.get()
+            nbr = nbrEntry.get()
             if not nbr.isdigit():
                 raise Exception()
         except:
-            nbrErrorLabel = tk.Label(text="Il faut entre un nombre.", master=frame, fg="red")
-            nbrErrorLabel.grid(column=0, row=3)
+            gui.Label(master=frame, text="Il faut entre un nombre.", fg="red", column=0, row=3)
 
             frame.pack()
             return
         
         downloadVideos(nbr)
 
-    button = tk.Button(master=frame,
-                       text="Download",
-                       command=buttonNbrPressed
-                       )
-    button.grid(column=0, row=2)
+    nbrButton = gui.Button(master=frame, text="Télécharger", command=buttonNbrPressed, column=0, row=2)
 
-    label2 = tk.Label(text="Lien de la vidéo à télécharger: ", master=frame)
-    label2.grid(column=0, row=4)
+    label2 = gui.Label(master=frame, text="Lien de la vidéo à téléchager: ", column=0, row=4)
 
-    linkInput = tk.Entry(master=frame)
-    linkInput.grid(column=0, row=5)
+    linkEntry = gui.Entry(master=frame, column=0, row=5)
 
     def buttonLinkPressed():
         try:
-            link = linkInput.get()
+            link = linkEntry.get()
             regex = re.compile(r'^https:\/\/www\.tiktok\.com\/@[\w.-]+\/video\/\d+$')
             if not regex.match(link):
                 raise Exception()
         except:
-            linkErrorLabel = tk.Label(text="Il faut un lien valide.", master=frame, fg="red")
-            linkErrorLabel.grid(column=0, row=7)
+            gui.Label(master=frame, text="Il faut un lien valide.", fg="red", column=0, row=7)
 
             frame.pack()
             return
@@ -121,11 +109,6 @@ if __name__ == "__main__":
         list = TiktokDownload().getVideoByUrl(link)
         Download(list)
 
-    button = tk.Button(master=frame,
-                       text="Download from link",
-                       command=buttonLinkPressed
-                       )
-    button.grid(column=0, row=6)
-    
-    frame.pack()
+    linkButton = gui.Button(master=frame, text="Télécharger", command=buttonLinkPressed, column=0, row=6)
+
     window.mainloop()
